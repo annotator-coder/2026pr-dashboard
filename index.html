@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팀 업무 성과 대시보드</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; padding: 28px 40px 20px;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header h1 span { color: #e94560; }
+  .quarter-tabs { display: flex; gap: 6px; }
+  .q-tab {
+    padding: 5px 14px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.2);
+    background: transparent; color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .q-tab:hover { border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.8); }
+  .q-tab.active { background: #e94560; border-color: #e94560; color: white; }
+  .q-tab.empty { opacity: 0.35; cursor: default; }
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 18px; min-width: 110px; }
+  .stat .num { font-size: 24px; font-weight: 800; color: #e94560; }
+  .stat .label { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+  /* FILTER BAR — compact */
+  .filter-bar {
+    background: white; padding: 8px 40px;
+    border-bottom: 1px solid #e8eaed;
+    display: flex; gap: 5px; flex-wrap: wrap; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .filter-label { font-size: 11px; font-weight: 600; color: #aaa; margin-right: 3px; white-space: nowrap; }
+  .filter-btn {
+    padding: 3px 10px; border-radius: 12px; border: 1.5px solid #e0e0e0;
+    background: white; font-size: 11px; cursor: pointer; transition: all 0.15s;
+    font-weight: 500; color: #666; white-space: nowrap;
+  }
+  .filter-btn:hover { opacity: 0.85; }
+  .filter-btn.active { color: white; }
+  .filter-divider { width: 1px; height: 16px; background: #e0e0e0; margin: 0 2px; }
+  .vm-filter-btn {
+    padding: 3px 10px; border-radius: 12px; border: 1.5px solid #c0392b;
+    background: white; font-size: 11px; cursor: pointer; transition: all 0.15s;
+    font-weight: 700; color: #c0392b; white-space: nowrap;
+  }
+  .vm-filter-btn.active { background: #c0392b; color: white; }
+
+  /* MAIN */
+  .main { padding: 28px 40px; }
+  .section-title { font-size: 12px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  /* VM SPOTLIGHT */
+  .vm-section {
+    background: linear-gradient(135deg, #fff5f5 0%, #fff9f0 100%);
+    border: 1.5px solid #f5c6c6; border-radius: 14px;
+    padding: 18px 22px; margin-bottom: 32px;
+  }
+  .vm-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .vm-badge-title {
+    background: #c0392b; color: white; padding: 3px 10px;
+    border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.3px;
+  }
+  .vm-title-text { font-size: 14px; font-weight: 800; color: #c0392b; }
+  .vm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .vm-item {
+    background: white; border-radius: 10px; padding: 12px 14px;
+    border-left: 3px solid #c0392b; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .vm-item-header { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .vm-member-dot { width: 18px; height: 18px; border-radius: 50%; font-size: 8px; font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .vm-item-name { font-size: 11px; font-weight: 600; color: #888; }
+  .vm-item-title { font-size: 12px; font-weight: 700; color: #1a1a2e; line-height: 1.4; }
+  .vm-item-detail { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.5; }
+
+  /* CATEGORY SUMMARY */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 32px; }
+  .cat-card {
+    background: white; border-radius: 10px; padding: 14px;
+    border-left: 3px solid; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;
+  }
+  .cat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.09); }
+  .cat-card .cat-name { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+  .cat-card .cat-count { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+  .cat-card .cat-meta { font-size: 10px; color: #bbb; margin-top: 2px; }
+  .avatar-row { display: flex; gap: 3px; margin-top: 7px; flex-wrap: wrap; }
+  .avatar { width: 20px; height: 20px; border-radius: 50%; font-size: 8px; font-weight: 700; color: white; display: flex; align-items: center; justify-content: center; }
+
+  /* MEMBER GRID */
+  .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 20px; }
+  .member-card {
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: box-shadow 0.2s;
+  }
+  .member-card:hover { box-shadow: 0 5px 18px rgba(0,0,0,0.09); }
+  .member-header {
+    padding: 16px 20px 14px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .member-avatar { width: 42px; height: 42px; border-radius: 50%; font-size: 14px; font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .member-name { font-size: 15px; font-weight: 800; }
+  .member-title { font-size: 11px; color: #999; margin-top: 2px; }
+  .member-task-count { margin-left: auto; background: #f0f2f5; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #666; }
+
+  .task-list { padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 9px; }
+  .task-item { display: flex; gap: 8px; align-items: flex-start; }
+  .task-item-inner { display: flex; gap: 8px; align-items: flex-start; flex: 1; }
+  .task-cat-badge {
+    padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+  }
+  .vm-star { color: #c0392b; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+  .task-title { font-size: 12px; font-weight: 600; line-height: 1.4; }
+  .task-detail { font-size: 11px; color: #999; margin-top: 2px; line-height: 1.5; }
+  .task-tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .tag { padding: 1px 6px; border-radius: 3px; font-size: 10px; background: #f0f2f5; color: #777; }
+  .tag.vm-tag { background: #fdf0f0; color: #c0392b; }
+
+  .hidden { display: none !important; }
+  .no-data {
+    text-align: center; padding: 60px 20px; color: #bbb;
+    font-size: 14px; grid-column: 1 / -1;
+  }
+
+  /* 주요성과 박스 */
+  .achievements-box {
+    margin-top: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 12px;
+    padding: 16px 22px;
+  }
+  .achievements-title {
+    font-size: 11px; font-weight: 700; color: #e94560;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 7px;
+  }
+  .achievements-title::before {
+    content: '★'; font-size: 10px;
+  }
+  .achievements-list {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .achievement-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.88);
+  }
+  .achievement-item::before {
+    content: '·'; color: #e94560; font-size: 18px; line-height: 1; flex-shrink: 0; margin-top: -2px;
+  }
+  .achievement-item strong {
+    color: #ffffff; font-weight: 700; white-space: nowrap; margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>팀 업무 성과 <span>대시보드</span></h1>
+    <div class="quarter-tabs" id="quarter-tabs"></div>
+  </div>
+  <div class="stat-row" id="stat-row">
+    <div class="stat"><div class="num" id="stat-reported">0</div><div class="label">보고 팀원</div></div>
+    <div class="stat"><div class="num" id="stat-tasks">0</div><div class="label">총 업무 항목</div></div>
+    <div class="stat"><div class="num" id="stat-vm">0</div><div class="label">VM 전략과업</div></div>
+    <div class="stat"><div class="num" id="stat-missing">0</div><div class="label">미보고 팀원</div></div>
+  </div>
+
+  <div class="achievements-box">
+    <div class="achievements-title">주요성과</div>
+    <div class="achievements-list">
+      <div class="achievement-item"><strong>60주년 JV 케이스 스터디 :</strong> VM 창립 60주년 기념으로 기업 역사상 최초의 학술 케이스 스터디를 기획·추진, 집필진 섭외부터 HBS 케이스 컬렉션 등재까지 전 과정 주도 (1~11월)</div>
+      <div class="achievement-item"><strong>대외채널 강화로 타겟 볼륨 확대 :</strong> LinkedIn 글로벌 채널 전략 수립·Middle East 광고 집행으로 팔로워 5,860명 up(현 1.5k)·노출 537,618회·클릭 33,800건 달성, 인스타그램은 콘텐츠 풀 15개 구축, 5월 초 본격 런칭</div>
+      <div class="achievement-item"><strong>홍보 DAX 제작 역량 내재화 :</strong> 기획·리서치·팩트체크·브랜드보이스·SEO·디자인·웹페이지·교열 등 전 제작 단계를 커버하는 <a href="https://drive.google.com/file/d/1Xzv8l6qcYd1x8xigPJu4xeZep3zgVeF7/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">AI Agent </a>팀 및 홈페이지 PM Agent 팀을 자체 구축, 외부 의존도 감소·제작 속도 개선 ex) <a href="https://annotator-coder.github.io/artfesta59/" target="_blank" style="color:inherit;text-decoration:underline;">웹전시관</a></div>
+      <div class="achievement-item"><strong>신규 캠페인 — Art Festa :</strong> 정유업에 대한 사내외 인식 개선 및 임직원 자긍심 고취를 목표로 'GS칼텍스 Art Festa' 캠페인 기획·추진, 임직원 참여자 110명+ 모집 및 온라인 전시회 연계 (진행 중) <a href="https://drive.google.com/file/d/1lRQWPwIILrCfUNhFx3JAhplVT3qb4c1Z/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">참고)art festa 캠페인</a></div>
+      <div class="achievement-item"><strong>중동 사태 언론 대응 체계 구축 :</strong> 이슈대응 루프 마스터 페이지 기반 언론대응 시스템 구축, 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 참고자료 선제 제공으로 중앙, 헤럴드, 아주 등 기획 13건, 업계전문지 모임 정례화로 부정이슈 차단</div>
+      <div class="achievement-item"><strong>팀간 CF 협업 — 배구단 우승 기념 :</strong> GS타워 B1~1F 사진전(30점 큐레이션·포토월)·헌정 영상·임직원 이벤트를 기획·운영하여 우승 모멘텀을 활용한 조직 자긍심 고취 및 브랜드 경험 제공</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">카테고리</span>
+  <button class="filter-btn active" id="btn-all" onclick="filterCategory('all')" style="border-color:#999;color:#555">전체</button>
+  <button class="filter-btn" onclick="filterCategory('internal')" data-cat="internal">Internal Comm.</button>
+  <button class="filter-btn" onclick="filterCategory('pr')"       data-cat="pr">대외홍보 / PR</button>
+  <button class="filter-btn" onclick="filterCategory('csr')"      data-cat="csr">CSR</button>
+  <button class="filter-btn" onclick="filterCategory('content')"  data-cat="content">콘텐츠 / 출판</button>
+  <button class="filter-btn" onclick="filterCategory('sns')"      data-cat="sns">SNS / 디지털</button>
+  <button class="filter-btn" onclick="filterCategory('sports')"   data-cat="sports">스포츠 마케팅</button>
+  <button class="filter-btn" onclick="filterCategory('campaign')" data-cat="campaign">캠페인 / 이벤트</button>
+  <button class="filter-btn" onclick="filterCategory('pi')"       data-cat="pi">PI 업무</button>
+  <button class="filter-btn" onclick="filterCategory('etc')"      data-cat="etc">기타(스팟성)</button>
+  <div class="filter-divider"></div>
+  <button class="vm-filter-btn" id="btn-vm" onclick="filterVM()">★ VM 전략과업</button>
+</div>
+
+<div class="main">
+  <div id="vm-section-wrap"></div>
+
+  <div class="section-title">카테고리별 업무 현황</div>
+  <div class="cat-grid" id="cat-grid"></div>
+
+  <div class="section-title">팀원별 업무 상세</div>
+  <div class="member-grid" id="member-grid"></div>
+</div>
+
+<script>
+const TOTAL_MEMBERS = 7;
+
+const CAT = {
+  internal: { label: 'Internal Comm.', color: '#e94560', bg: '#ffeef1' },
+  pr:       { label: '대외홍보 / PR',  color: '#0f3460', bg: '#e8edf5' },
+  csr:      { label: 'CSR',            color: '#27ae60', bg: '#e8f8f0' },
+  content:  { label: '콘텐츠 / 출판', color: '#e67e00', bg: '#fff3e0' },
+  sns:      { label: 'SNS / 디지털',  color: '#8e44ad', bg: '#f5eeff' },
+  sports:   { label: '스포츠 마케팅', color: '#16a085', bg: '#e6f7f4' },
+  campaign: { label: '캠페인 / 이벤트', color: '#d35400', bg: '#fff0e6' },
+  pi:       { label: 'PI 업무',        color: '#2980b9', bg: '#eaf4fc' },
+  etc:      { label: '기타(스팟성)',   color: '#7f8c8d', bg: '#f2f3f4' },
+};
+
+// ─────────────────────────────────────────────
+// 데이터 구조: 분기별로 관리
+// 새 분기 데이터 추가 시 QUARTERS에 키를 추가하고 members 배열을 채워 넣으면 됩니다.
+// ─────────────────────────────────────────────
+const QUARTERS = {
+  'Q1': {
+    year: 2025,
+    members: [
+      {
+        name: '박주영', title: '책임', color: '#e94560', initials: '박',
+        tasks: [
+          {
+            cat: 'content', vm: true,
+            title: 'JV Case Study 추진',
+            detail: 'VM 창립 60주년 프로젝트 — 사전조사·집필진 섭외(1~3월), 킥오프(4월), 자료전달·스터디(5~6월), 인터뷰(7~8월), 원고마감(10월), 케이스 컬렉션 등재(11월)',
+            tags: ['VM 60주년', '케이스스터디', '교수 협업']
+          },
+          {
+            cat: 'content',
+            title: '맥킨지 인터뷰 서적 발간 준비',
+            detail: '서적 9월 발간, 온라인 6월 릴리즈 잠정 논의 / 수록 내용 협의 진행 중',
+            tags: ['서적 발간', '온라인 발행']
+          },
+          {
+            cat: 'internal',
+            title: 'Internal Comm. 콘텐츠 제작',
+            detail: '에너지플러스뉴스 5건, 언박싱 영상 1건(여수공장), Face+Time 영상 3건(팀장·항해사·책임), G식 노트 1편(4월 말 발행 예정)',
+            tags: ['뉴스레터', '영상', '사내콘텐츠']
+          },
+          {
+            cat: 'pi',
+            title: '일반 PI 업무',
+            detail: '신년사 작성, 상반기 EDP 메시지, 배구단 우승기념 CEO 메시지',
+            tags: ['CEO 메시지', '신년사', 'EDP']
+          },
+        ]
+      },
+      {
+        name: '이현상', title: '책임', color: '#8e44ad', initials: '이',
+        tasks: [
+          {
+            cat: 'sns', vm: true,
+            title: '인스타그램 채널 운영',
+            detail: '전략·콘텐츠 계획 수립(2월) → 콘텐츠 pool 15개 확보(이미지 4개·릴스 9개·CSR 2개) → 운영업체 글로픽스 계약(5/15 재런칭)',
+            tags: ['인스타그램', 'SNS', '글로픽스', '채널 재런칭']
+          },
+          {
+            cat: 'csr', vm: true,
+            title: '신규 인재양성 프로그램 구축',
+            detail: '대학 융합교육 지원 프로그램 기획(KAIST·서연고 4개대 협의) — 보고 대기(4월), CSR 프레임워크 보고 후 하반기 런칭 예정',
+            tags: ['KAIST', '대학협력', 'CSR 체계']
+          },
+          {
+            cat: 'content',
+            title: '스튜디오발랄 영상 제작',
+            detail: '배구단 우승 헌정 영상(4월), 매경오픈 트레일러(4월), GS-셰브론 파트너십 영상(5월 중), 프로기전 결승 홍보영상(6월 예정)',
+            tags: ['영상제작', '배구', '바둑', '골프']
+          },
+          {
+            cat: 'campaign',
+            title: 'GS칼텍스 Art Festa',
+            detail: '캠페인 기획 보조·포스터 제작(4월), AI 활용 결과 영상 제작 예정(5월)',
+            tags: ['Art Festa', '캠페인', 'AI 영상']
+          },
+          {
+            cat: 'csr',
+            title: '마음톡톡 천명지킴 캠페인',
+            detail: '위촉식·발대식 행사 어레인지, 부스 운영(4월)',
+            tags: ['사회공헌', '캠페인']
+          },
+        ]
+      },
+      {
+        name: '조남욱', title: '책임', color: '#0f3460', initials: '조',
+        tasks: [
+          {
+            cat: 'pr',
+            title: '대언론 관계 구축 및 부정 이슈 대응',
+            detail: '업계 전문지 정례 모임화 → 중동전쟁 관련 부정 이슈(폭리 논란·최고가격제·사후정산) 차단 / 기사 반영 7건',
+            tags: ['언론관계', '이슈대응', '중동전쟁']
+          },
+          {
+            cat: 'pr',
+            title: '전략사업 홍보 보도자료·기획기사',
+            detail: '에너지플러스 현대카드 보도자료 14건, CCUS 캠페인 18건, PLCC 기획기사 2건, 휘발유 가격 비교 기사 1건',
+            tags: ['보도자료', 'CCUS', '현대카드 PLCC', '35건']
+          },
+          {
+            cat: 'sports',
+            title: '바둑팀 및 프로기전 운영',
+            detail: '바둑팀·배구팀 경기 관람 콘텐츠 제작(1월), 프로기전 결승 홍보영상 제작 예정(발랄 협업, 6월)',
+            tags: ['바둑', '프로기전', '콘텐츠']
+          },
+        ]
+      },
+      {
+        name: '윤나라', title: '책임', color: '#e67e22', initials: '윤',
+        tasks: [
+          {
+            cat: 'csr', vm: true,
+            title: '서울숲 배움정원 (VM 기준 CSR)',
+            detail: '배움정원 조성 완료(4월)·서울국제정원박람회 참가(5~10월) / 임직원 가드닝 봉사 40명 확정(5월)·보도자료·콘텐츠 / 어린이 생태 드로잉 교실(6~8월, 회차별 진행) — 콘텐츠 1차(5월), 보도자료(6월), 콘텐츠 2차(8월)',
+            tags: ['VM 기준', '서울숲', '가드닝', '박람회', '어린이 교실']
+          },
+          {
+            cat: 'sns',
+            title: '홈페이지 유지관리 (VM 연관)',
+            detail: '마케팅 4관왕 팝업·배구 우승 팝업·보고서·재무정보·국영문 업데이트 등 17건',
+            tags: ['VM 연관', '홈페이지', '디지털', '17건']
+          },
+          {
+            cat: 'csr',
+            title: '사내 CSR 전수조사 및 GSC 장학회 콘텐츠',
+            detail: '전사 CSR 활동 전수조사 완료(4월) / GSC 장학회 콘텐츠 제작 완료',
+            tags: ['VM 연관', 'CSR 전수조사', 'GSC 장학회']
+          },
+          {
+            cat: 'campaign',
+            title: 'GS칼텍스 ART FESTA 임직원 이벤트',
+            detail: '임직원 참여자 모집 중(4/28 마감, 현재 97명 신청) → 보도자료·콘텐츠·온라인 전시회(5월)',
+            tags: ['Art Festa', '이벤트', '97명']
+          },
+          {
+            cat: 'etc',
+            title: '재단법인 케이스포츠 최후배당금 환수',
+            detail: '최후배당금 환수 관련 업무 처리 — 4월 중 완료 예정',
+            tags: ['케이스포츠', '재단', '스팟']
+          },
+          {
+            cat: 'csr',
+            title: 'BAU — 전사 기부금 집행·관리',
+            detail: '통합 기안, 연말성금 지정기탁 신청, 관련 문의 대응',
+            tags: ['기부금', 'BAU']
+          },
+        ]
+      },
+      {
+        name: '최태환', title: '책임', color: '#27ae60', initials: '최',
+        tasks: [
+          {
+            cat: 'csr',
+            title: 'CSR 활동 — 구룡마을·에너지효율화·FC서울',
+            detail: '구룡마을 화재 긴급지원 1천만원(1월)·콘텐츠(3월)·감사패(5월) / 에너지효율화 6억 조기 집행(2월)·보도자료 준비 / FC서울 다문화 축구교실 후원 1천만원, 교류전(5~7월)',
+            tags: ['구룡마을', '에너지효율화', 'FC서울', 'VM 기준']
+          },
+          {
+            cat: 'pr',
+            title: '미디어 커뮤니케이션 — 배구단·퀵스냅·에너지칼럼',
+            detail: '배구단 TV 출연 제안(꼬꼬무·냉부·유퀴즈 협의), 퀵스냅 시리즈 2편 엘리베이터 방영(4월), 에너지칼럼 주제 선정·전문가 섭외(4~5월)',
+            tags: ['배구단', '퀵스냅', '에너지칼럼', 'TV기획']
+          },
+          {
+            cat: 'etc',
+            title: '29층 리모델링 TF',
+            detail: '현장설명회(4/10) → Q&A(~4/15) → 견적마감(5/7) → 현장PT(5/12) → 평가·우선협상 통보(5/13) → 계약(~5/15)',
+            tags: ['리모델링', 'TF', '시설']
+          },
+        ]
+      },
+      {
+        name: '김정현', title: '책임', color: '#1abc9c', initials: '김',
+        tasks: [
+          {
+            cat: 'pr',
+            title: '보도자료 배포',
+            detail: '베올리아 MOU 체결 보도자료 / 네이버페이 주유 적립 보도자료',
+            tags: ['베올리아', 'MOU', '네이버페이', '주유 적립']
+          },
+          {
+            cat: 'pr',
+            title: '언론 대응',
+            detail: '중동 사태 및 국내 취재 대응 (중앙·한경·서경·파뉴·머투·뉴시스·뉴스1 등) / 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 자료 제공 및 기사화 유도',
+            tags: ['중동 사태', '언론 대응', '최고가격제', '가격 비교']
+          },
+          {
+            cat: 'sns', vm: true,
+            title: '인스타그램 카드뉴스 아이템 축적',
+            detail: 'VM SNS 카테고리 — 인스타그램 게시용 카드뉴스 소재 발굴 및 아이템 풀 지속 축적',
+            tags: ['VM SNS', '인스타그램', '카드뉴스']
+          },
+        ]
+      },
+      {
+        name: '정예은', title: '책임', color: '#3498db', initials: '정',
+        tasks: [
+          {
+            cat: 'sns', vm: true,
+            title: '홈페이지 리뉴얼 추진 — Corporate Information Hub 구축',
+            detail: '1Q: 수행사 서치·컨택·미팅(5개사↑), RFI 준비 / 5월 비딩·수행사 선정 → 구조·콘텐츠 전략 설계 및 개발 착수 예정 / \'27년 1Q 오픈 목표 (ongoing)',
+            tags: ['VM 기준', '홈페이지 리뉴얼', 'RFI', "'27년 오픈"]
+          },
+          {
+            cat: 'sns', vm: true,
+            title: 'LinkedIn 채널 운영 및 고도화 — External Comm. 강화',
+            detail: '글로벌 타겟 기반 채널 전략 수립 및 실행 / Middle East 중심 광고 집행 / 성과(~4.19): 팔로워 5,860명·노출 537,618·클릭 33,800 / 5월~ "Energy: Today & Tomorrow" 시리즈 런칭 예정',
+            tags: ['VM 기준', 'LinkedIn', '글로벌', '팔로워 5,860명']
+          },
+          {
+            cat: 'internal',
+            title: '부문 VM 성과 취합 및 보고',
+            detail: '1Q 성과 취합 기준 정리 및 부문별 데이터 취합 / KPI 기준 과업 구조화 / 6월 상반기 성과 보고 예정 (ongoing)',
+            tags: ['VM KPI', '성과 취합', '상반기 보고']
+          },
+          {
+            cat: 'campaign',
+            title: '배구단 우승 기념 사진전 기획·운영',
+            detail: 'GS타워 B1~1F 공간 활용 / 사진 30점 큐레이션·관람 동선 구성·포토월 운영 / 임직원·방문객 대상 브랜드 경험 및 조직 자긍심 제고',
+            tags: ['배구단', '사진전', '포토월', '완료']
+          },
+        ]
+      },
+    ]
+  },
+  'Q2': { year: 2025, members: [] },
+  'Q3': { year: 2025, members: [] },
+  'Q4': { year: 2025, members: [] },
+};
+
+// ─── state ───
+let currentQ = 'Q1';
+let currentCat = 'all';
+let vmOnly = false;
+
+// ─── init ───
+buildQuarterTabs();
+renderAll();
+
+function buildQuarterTabs() {
+  const wrap = document.getElementById('quarter-tabs');
+  ['Q1','Q2','Q3','Q4'].forEach(q => {
+    const hasData = QUARTERS[q].members.length > 0;
+    const btn = document.createElement('button');
+    btn.className = 'q-tab' + (q === currentQ ? ' active' : '') + (!hasData ? ' empty' : '');
+    btn.textContent = `${QUARTERS[q].year} ${q}`;
+    btn.onclick = () => {
+      if (!hasData && q !== currentQ) return;
+      currentQ = q;
+      currentCat = 'all';
+      vmOnly = false;
+      document.querySelectorAll('.q-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderAll();
+      resetFilterUI();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function resetFilterUI() {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = b.dataset.cat ? CAT[b.dataset.cat]?.color : '#666';
+    b.style.borderColor = b.dataset.cat ? CAT[b.dataset.cat]?.color : '#e0e0e0';
+  });
+  document.getElementById('btn-all').classList.add('active');
+  document.getElementById('btn-all').style.background = '#1a1a2e';
+  document.getElementById('btn-all').style.color = 'white';
+  document.getElementById('btn-all').style.borderColor = '#1a1a2e';
+  document.getElementById('btn-vm').classList.remove('active');
+}
+
+function renderAll() {
+  const q = QUARTERS[currentQ];
+  const members = q.members;
+  const totalTasks = members.reduce((s, m) => s + m.tasks.length, 0);
+  const vmTasks = members.reduce((s, m) => s + m.tasks.filter(t => t.vm).length, 0);
+
+  document.getElementById('stat-reported').textContent = members.length;
+  document.getElementById('stat-tasks').textContent = totalTasks;
+  document.getElementById('stat-vm').textContent = vmTasks;
+  document.getElementById('stat-missing').textContent = TOTAL_MEMBERS - members.length;
+
+  renderVMSection(members);
+  renderCatGrid(members);
+  renderMemberGrid(members);
+  applyFilters();
+}
+
+function renderVMSection(members) {
+  const wrap = document.getElementById('vm-section-wrap');
+  const vmItems = [];
+  members.forEach(m => {
+    m.tasks.filter(t => t.vm).forEach(t => vmItems.push({ member: m, task: t }));
+  });
+  if (!vmItems.length) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = `
+    <div class="vm-section" id="vm-section">
+      <div class="vm-header">
+        <div class="vm-badge-title">VM 전략과업</div>
+        <div class="vm-title-text">팀 연간전략 연계 핵심 과업</div>
+      </div>
+      <div class="vm-grid">
+        ${vmItems.map(({member: m, task: t}) => `
+        <div class="vm-item">
+          <div class="vm-item-header">
+            <div class="vm-member-dot" style="background:${m.color}">${m.initials}</div>
+            <span class="vm-item-name">${m.name} ${m.title}</span>
+            <span class="task-cat-badge" style="background:${CAT[t.cat].bg};color:${CAT[t.cat].color}">${CAT[t.cat].label}</span>
+          </div>
+          <div class="vm-item-title">${t.title}</div>
+          <div class="vm-item-detail">${t.detail}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div style="margin-bottom:32px"></div>
+  `;
+}
+
+function renderCatGrid(members) {
+  const catCount = {}, catMembers = {};
+  members.forEach(m => {
+    m.tasks.forEach(t => {
+      catCount[t.cat] = (catCount[t.cat] || 0) + 1;
+      if (!catMembers[t.cat]) catMembers[t.cat] = new Set();
+      catMembers[t.cat].add(m.name[0]);
+    });
+  });
+
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = '';
+  if (!members.length) { grid.innerHTML = '<div class="no-data">이번 분기 데이터가 없습니다</div>'; return; }
+
+  Object.entries(CAT).forEach(([key, c]) => {
+    const count = catCount[key] || 0;
+    if (!count) return;
+    const mems = [...(catMembers[key] || [])];
+    const el = document.createElement('div');
+    el.className = 'cat-card';
+    el.style.borderLeftColor = c.color;
+    el.innerHTML = `
+      <div class="cat-name" style="color:${c.color}">${c.label}</div>
+      <div class="cat-count">${count}</div>
+      <div class="cat-meta">업무 항목</div>
+      <div class="avatar-row">${mems.map(n => `<div class="avatar" style="background:${members.find(m=>m.name[0]===n)?.color}">${n}</div>`).join('')}</div>
+    `;
+    el.onclick = () => filterCategory(key);
+    grid.appendChild(el);
+  });
+}
+
+function renderMemberGrid(members) {
+  const grid = document.getElementById('member-grid');
+  grid.innerHTML = '';
+  if (!members.length) { grid.innerHTML = '<div class="no-data">이번 분기 데이터가 없습니다</div>'; return; }
+
+  members.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    card.dataset.member = m.name;
+
+    const taskHTML = m.tasks.map(t => {
+      const c = CAT[t.cat];
+      return `
+      <div class="task-item" data-cat="${t.cat}" data-vm="${t.vm ? '1' : '0'}">
+        <div class="task-item-inner">
+          ${t.vm ? '<span class="vm-star" title="VM 전략과업">★</span>' : ''}
+          <div class="task-cat-badge" style="background:${c.bg};color:${c.color}">${c.label}</div>
+          <div>
+            <div class="task-title">${t.title}</div>
+            <div class="task-detail">${t.detail}</div>
+            <div class="task-tags">${t.tags.map(tag=>`<span class="tag${tag.startsWith('VM') ? ' vm-tag' : ''}">${tag}</span>`).join('')}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="member-header">
+        <div class="member-avatar" style="background:${m.color}">${m.initials}</div>
+        <div>
+          <div class="member-name">${m.name}</div>
+          <div class="member-title">${m.title}</div>
+        </div>
+        <div class="member-task-count">${m.tasks.length}개 업무</div>
+      </div>
+      <div class="task-list">${taskHTML}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function applyFilters() {
+  document.querySelectorAll('.task-item').forEach(item => {
+    const catMatch = currentCat === 'all' || item.dataset.cat === currentCat;
+    const vmMatch = !vmOnly || item.dataset.vm === '1';
+    item.classList.toggle('hidden', !(catMatch && vmMatch));
+  });
+  document.querySelectorAll('.member-card').forEach(card => {
+    const visible = card.querySelectorAll('.task-item:not(.hidden)').length;
+    card.style.display = visible > 0 ? '' : 'none';
+  });
+  const vmSection = document.getElementById('vm-section');
+  if (vmSection) vmSection.style.display = (currentCat !== 'all') ? 'none' : '';
+}
+
+function filterCategory(cat) {
+  currentCat = cat;
+  vmOnly = false;
+  document.getElementById('btn-vm').classList.remove('active');
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.background = '';
+    const bc = btn.dataset.cat;
+    if (bc) {
+      btn.style.color = CAT[bc].color;
+      btn.style.borderColor = CAT[bc].color;
+    } else {
+      btn.style.color = '#666';
+      btn.style.borderColor = '#e0e0e0';
+    }
+    if (cat === 'all' && !bc) {
+      btn.classList.add('active');
+      btn.style.background = '#1a1a2e';
+      btn.style.color = 'white';
+      btn.style.borderColor = '#1a1a2e';
+    } else if (bc === cat) {
+      btn.classList.add('active');
+      btn.style.background = CAT[cat].color;
+      btn.style.color = 'white';
+      btn.style.borderColor = CAT[cat].color;
+    }
+  });
+  applyFilters();
+}
+
+function filterVM() {
+  vmOnly = !vmOnly;
+  currentCat = 'all';
+  document.getElementById('btn-vm').classList.toggle('active', vmOnly);
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.background = '';
+    const bc = btn.dataset.cat;
+    btn.style.color = bc ? CAT[bc].color : '#666';
+    btn.style.borderColor = bc ? CAT[bc].color : '#e0e0e0';
+  });
+  if (!vmOnly) {
+    document.getElementById('btn-all').classList.add('active');
+    document.getElementById('btn-all').style.background = '#1a1a2e';
+    document.getElementById('btn-all').style.color = 'white';
+    document.getElementById('btn-all').style.borderColor = '#1a1a2e';
+  }
+  applyFilters();
+}
+
+// init filter btn styles
+document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
+  const c = CAT[btn.dataset.cat];
+  btn.style.color = c.color;
+  btn.style.borderColor = c.color;
+});
+document.getElementById('btn-all').style.background = '#1a1a2e';
+document.getElementById('btn-all').style.color = 'white';
+document.getElementById('btn-all').style.borderColor = '#1a1a2e';
+</script>
+</body>
+</html>
