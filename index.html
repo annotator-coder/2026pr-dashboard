@@ -161,9 +161,50 @@
   .achievement-item strong {
     color: #ffffff; font-weight: 700; white-space: nowrap; margin-right: 4px;
   }
+
+  /* PAGE NAV */
+  .page-nav {
+    background: #0f3460; display: flex; align-items: center; gap: 0;
+    border-bottom: 2px solid #1a237e;
+  }
+  .page-nav-logo {
+    padding: 0 20px; font-size: 12px; font-weight: 700;
+    color: rgba(255,255,255,.5); letter-spacing: .5px; white-space: nowrap;
+  }
+  .page-tab {
+    padding: 12px 22px; font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,.55); cursor: pointer; border: none;
+    background: transparent; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all .15s;
+  }
+  .page-tab:hover { color: rgba(255,255,255,.85); }
+  .page-tab.active { color: #fff; border-bottom-color: #e94560; }
+
+  /* KPI IFRAME */
+  .kpi-frame-wrap { background: #F1F3F4; min-height: 100vh; padding: 0; }
+  .kpi-frame-wrap iframe { display: block; width: 100%; height: 100vh; border: none; }
 </style>
 </head>
 <body>
+
+<!-- 페이지 탭 네비게이션 -->
+<nav class="page-nav">
+  <span class="page-nav-logo">GS칼텍스 홍보부문</span>
+  <button class="page-tab" id="tab-kpi" onclick="showTab('kpi')">📊 KPI 달성률</button>
+  <button class="page-tab active" id="tab-team" onclick="showTab('team')">👥 팀 업무 현황</button>
+</nav>
+
+<!-- KPI 대시보드 iframe -->
+<div id="view-kpi" class="kpi-frame-wrap" style="display:none">
+  <iframe
+    src="https://script.google.com/macros/s/AKfycby1lMeSQmurttJHq1WB7r6h2vpjMsmyYejBkS5fMG9WPK6UiTYDj5NZ-tkjWS-QgbPB/exec"
+    title="KPI Dashboard"
+    loading="lazy">
+  </iframe>
+</div>
+
+<!-- 팀 업무 대시보드 -->
+<div id="view-team">
 
 <div class="header">
   <div class="header-top">
@@ -679,6 +720,14 @@ function filterVM() {
   applyFilters();
 }
 
+// 탭 전환
+function showTab(tab) {
+  document.getElementById('view-kpi').style.display  = tab === 'kpi'  ? '' : 'none';
+  document.getElementById('view-team').style.display = tab === 'team' ? '' : 'none';
+  document.getElementById('tab-kpi').classList.toggle('active',  tab === 'kpi');
+  document.getElementById('tab-team').classList.toggle('active', tab === 'team');
+}
+
 // init filter btn styles
 document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
   const c = CAT[btn.dataset.cat];
@@ -689,5 +738,7 @@ document.getElementById('btn-all').style.background = '#1a1a2e';
 document.getElementById('btn-all').style.color = 'white';
 document.getElementById('btn-all').style.borderColor = '#1a1a2e';
 </script>
+
+</div><!-- /view-team -->
 </body>
 </html>
