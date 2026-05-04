@@ -58,9 +58,11 @@ function _buildPayload() {
     });
   }
 
-  const updatedAt = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
+  const updatedAt    = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
+  const currentMonth = new Date().getMonth() + 1;
+  const expectedPct  = Math.round(currentMonth / 12 * 1000) / 10; // e.g. 33.3
 
-  return { overall, kpis, snsList, trend, updatedAt, ragCount };
+  return { overall, kpis, snsList, trend, updatedAt, ragCount, currentMonth, expectedPct };
 }
 
 function _grade(r) {

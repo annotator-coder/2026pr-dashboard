@@ -99,7 +99,7 @@ const ragBg = r => `bg-${rag(r)}`;
 const fmt = n => typeof n === 'number' ? Math.round(n * 10) / 10 : n;
 
 function render() {
-  const { overall, kpis, snsList, trend, updatedAt, ragCount } = D;
+  const { overall, kpis, snsList, trend, updatedAt, ragCount, currentMonth, expectedPct } = D;
 
   // ── 헤더 ──
   let html = `
@@ -144,6 +144,10 @@ function render() {
   // 비중 내림차순 정렬
   const sorted = [...kpis].sort((a, b) => b.weight - a.weight);
 
+  // 당월 기대치 표시 문자열 (payload에서 받거나 fallback 계산)
+  const curMonth  = currentMonth  || (new Date().getMonth() + 1);
+  const expPct    = expectedPct   || Math.round(curMonth / 12 * 1000) / 10;
+
   let bars = sorted.map(k => `
     <div class="bar-item">
       <div class="bar-lbl">
@@ -160,7 +164,10 @@ function render() {
     <tr>
       <td>${k.name}</td>
       <td><span class="w-badge">${k.weight}%</span></td>
-      <td><b>${fmt(k.rate)}%</b></td>
+      <td>
+        <b>${fmt(k.rate)}%</b>
+        <div style="font-size:9px;color:#9AA0A6;margin-top:1px">연간대비 ${fmt(k.rawRate ?? k.rate)}%</div>
+      </td>
       <td>${k.display}</td>
       <td>${ragBadge(k.rag)}</td>
     </tr>`).join('');
@@ -173,13 +180,14 @@ function render() {
 
   html += `<div class="row-main">
     <div class="card">
-      <div class="card-title">KPI별 달성률 (%)</div>
+      <div class="card-title">KPI별 달성률 — ${curMonth}월 궤도 기준</div>
       <div class="bar-list">${bars}</div>
       <div class="legend">
         <span><span class="dot" style="background:#4CAF50"></span>Green ≥90%</span>
         <span><span class="dot" style="background:#FF9800"></span>Amber 70~89%</span>
         <span><span class="dot" style="background:#F44336"></span>Red &lt;70%</span>
       </div>
+      <div class="note">📅 달성률 = 당월 기대치(연간목표 × ${curMonth}/12 = <b>${fmt(expPct)}%</b>) 대비 달성률</div>
     </div>
     <div class="card">
       <div class="card-title">KPI 현황 상세</div>
@@ -187,6 +195,7 @@ function render() {
         <thead><tr><th>KPI명</th><th>비중</th><th>달성률</th><th>현재값</th><th>RAG</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>
+      <div class="note" style="margin-top:8px">달성률: ${curMonth}월 기대치(${fmt(expPct)}%) 대비 / 소자: 연간 목표 대비 실제 달성률</div>
     </div>
   </div>`;
 

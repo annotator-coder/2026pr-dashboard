@@ -43,18 +43,32 @@ function _collectKpiData(ss) {
   const icActual     = v(qt,  'B36');  // 4Q 실제 응답률 (%)
   const icRate       = icActual > 0 ? Math.round(icActual / 80 * 100 * 10) / 10 : 0;
 
-  const rag = (r) => r >= 90 ? 'Green' : r >= 70 ? 'Amber' : 'Red';
+  // ── 시간비례 달성률: 연간목표 ÷ 12 × 경과월 = 당월 기대치 ──
+  // adj(raw): raw(연간대비%) / 당월기대비율 × 100 → 당월 궤도 대비 달성률 (0~100 캡)
+  const currentMonth = new Date().getMonth() + 1; // 1~12
+  const expectedFrac = currentMonth / 12;
+  const adj = (raw) => Math.min(100, Math.round((raw / expectedFrac) * 10) / 10);
+  const rag = (r) => r >= CONFIG.RAG.GREEN ? 'Green' : r >= CONFIG.RAG.AMBER ? 'Amber' : 'Red';
 
   return [
-    { id: 'KPI_1A', name: '60주년 사사 편찬',   cat: '정성_마일스톤', weight: 15, rate: sasaRate,     display: sasaRate + '%',   target: '100%',  rag: rag(sasaRate),    cycle: '연간' },
-    { id: 'KPI_1B', name: 'JV Case Study',       cat: '정성_마일스톤', weight: 10, rate: jvRate,       display: jvRate + '%',     target: '100%',  rag: rag(jvRate),      cycle: '연간' },
-    { id: 'KPI_2',  name: '홈페이지 고도화',     cat: '정성_마일스톤', weight: 20, rate: homepageRate, display: homepageRate+'%', target: '100%',  rag: rag(homepageRate),cycle: '연간' },
-    { id: 'KPI_3',  name: 'External Comm (SNS)', cat: '정량_SNS',      weight: 15, rate: snsRate,      display: snsRate + '%',    target: '100%',  rag: rag(snsRate),     cycle: '주간' },
-    { id: 'KPI_4',  name: 'DAX 업무절감',        cat: '정량_DAX',      weight: 10, rate: daxRate,      display: daxFte + ' FTE',  target: '2 FTE', rag: rag(daxRate),     cycle: '월별' },
-    { id: 'KPI_5A', name: 'Commercial PR',        cat: '정량_PR',       weight: 15, rate: prRate,       display: prCount + '건',   target: '22건',  rag: rag(prRate),      cycle: '월별' },
-    { id: 'KPI_5B', name: '외부 수상',            cat: '정성_마일스톤', weight:  5, rate: awardRate,    display: awardRate + '%',  target: '100%',  rag: rag(awardRate),   cycle: '연간' },
-    { id: 'KPI_6',  name: 'Internal Comm',        cat: '정량_서베이',   weight: 10, rate: icRate,       display: icActual + '%',   target: '80%',   rag: rag(icRate),      cycle: '반기' },
-    { id: 'KPI_7',  name: 'CSR Milestone',        cat: '정성_마일스톤', weight:  5, rate: csrRate,      display: csrRate + '%',    target: '100%',  rag: rag(csrRate),     cycle: '연간' },
+    { id: 'KPI_1A', name: '60주년 사사 편찬',   cat: '정성_마일스톤', weight: 15,
+      rate: adj(sasaRate),     rawRate: sasaRate,     display: sasaRate + '%',   target: '100%',  rag: rag(adj(sasaRate)),     cycle: '연간' },
+    { id: 'KPI_1B', name: 'JV Case Study',       cat: '정성_마일스톤', weight: 10,
+      rate: adj(jvRate),       rawRate: jvRate,       display: jvRate + '%',     target: '100%',  rag: rag(adj(jvRate)),       cycle: '연간' },
+    { id: 'KPI_2',  name: '홈페이지 고도화',     cat: '정성_마일스톤', weight: 20,
+      rate: adj(homepageRate), rawRate: homepageRate, display: homepageRate+'%', target: '100%',  rag: rag(adj(homepageRate)), cycle: '연간' },
+    { id: 'KPI_3',  name: 'External Comm (SNS)', cat: '정량_SNS',      weight: 15,
+      rate: adj(snsRate),      rawRate: snsRate,      display: snsRate + '%',    target: '100%',  rag: rag(adj(snsRate)),      cycle: '주간' },
+    { id: 'KPI_4',  name: 'DAX 업무절감',        cat: '정량_DAX',      weight: 10,
+      rate: adj(daxRate),      rawRate: daxRate,      display: daxFte + ' FTE',  target: '2 FTE', rag: rag(adj(daxRate)),      cycle: '월별' },
+    { id: 'KPI_5A', name: 'Commercial PR',        cat: '정량_PR',       weight: 15,
+      rate: adj(prRate),       rawRate: prRate,       display: prCount + '건',   target: '22건',  rag: rag(adj(prRate)),       cycle: '월별' },
+    { id: 'KPI_5B', name: '외부 수상',            cat: '정성_마일스톤', weight:  5,
+      rate: adj(awardRate),    rawRate: awardRate,    display: awardRate + '%',  target: '100%',  rag: rag(adj(awardRate)),    cycle: '연간' },
+    { id: 'KPI_6',  name: 'Internal Comm',        cat: '정량_서베이',   weight: 10,
+      rate: adj(icRate),       rawRate: icRate,       display: icActual + '%',   target: '80%',   rag: rag(adj(icRate)),       cycle: '반기' },
+    { id: 'KPI_7',  name: 'CSR Milestone',        cat: '정성_마일스톤', weight:  5,
+      rate: adj(csrRate),      rawRate: csrRate,      display: csrRate + '%',    target: '100%',  rag: rag(adj(csrRate)),      cycle: '연간' },
   ];
 }
 
