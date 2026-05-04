@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>팀 업무 성과 대시보드</title>
+<title>업무 성과 대시보드</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -190,8 +190,8 @@
 <!-- 페이지 탭 네비게이션 -->
 <nav class="page-nav">
   <span class="page-nav-logo">GS칼텍스 홍보부문</span>
-  <button class="page-tab" id="tab-kpi" onclick="showTab('kpi')">📊 KPI 달성률</button>
-  <button class="page-tab active" id="tab-team" onclick="showTab('team')">👥 팀 업무 현황</button>
+  <button class="page-tab" id="tab-kpi" onclick="showTab('kpi')">📊 부문 KPI 달성률</button>
+  <button class="page-tab active" id="tab-team" onclick="showTab('team')">👥 PR2팀 업무 현황</button>
 </nav>
 
 <!-- KPI 대시보드 iframe -->
@@ -221,11 +221,11 @@
   <div class="achievements-box">
     <div class="achievements-title">주요성과</div>
     <div class="achievements-list">
-      <div class="achievement-item"><strong>60주년 JV 케이스 스터디 :</strong> VM 창립 60주년 기념으로 기업 역사상 최초의 학술 케이스 스터디를 기획·추진, 집필진 섭외부터 HBS 케이스 컬렉션 등재까지 전 과정 주도 (1~11월)</div>
-      <div class="achievement-item"><strong>대외채널 강화로 타겟 볼륨 확대 :</strong> LinkedIn 글로벌 채널 전략 수립·Middle East 광고 집행으로 팔로워 5,860명 up(현 1.5k)·노출 537,618회·클릭 33,800건 달성, 인스타그램은 콘텐츠 풀 15개 구축, 5월 초 본격 런칭</div>
-      <div class="achievement-item"><strong>홍보 DAX 제작 역량 내재화 :</strong> 기획·리서치·팩트체크·브랜드보이스·SEO·디자인·웹페이지·교열 등 전 제작 단계를 커버하는 <a href="https://drive.google.com/file/d/1Xzv8l6qcYd1x8xigPJu4xeZep3zgVeF7/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">AI Agent </a>팀 및 홈페이지 PM Agent 팀을 자체 구축, 외부 의존도 감소·제작 속도 개선 ex) <a href="https://annotator-coder.github.io/artfesta59/" target="_blank" style="color:inherit;text-decoration:underline;">웹전시관</a></div>
-      <div class="achievement-item"><strong>신규 캠페인 — Art Festa :</strong> 정유업에 대한 사내외 인식 개선 및 임직원 자긍심 고취를 목표로 'GS칼텍스 Art Festa' 캠페인 기획·추진, 임직원 참여자 110명+ 모집 및 온라인 전시회 연계 (진행 중) <a href="https://drive.google.com/file/d/1lRQWPwIILrCfUNhFx3JAhplVT3qb4c1Z/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">참고)art festa 캠페인</a></div>
-      <div class="achievement-item"><strong>중동 사태 언론 대응 체계 구축 :</strong> 이슈대응 루프 마스터 페이지 기반 언론대응 시스템 구축, 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 참고자료 선제 제공으로 중앙, 헤럴드, 아주 등 기획 13건, 업계전문지 모임 정례화로 부정이슈 차단</div>
+      <div class="achievement-item"><strong>60주년 JV 케이스 스터디 :</strong> VM 창립 60주년 기념으로 최초 학술 케이스 스터디를 기획·추진, 집필진 섭외부터 HBS 케이스 컬렉션 등재까지 준비중 (1~11월) 교수섭외 후 자료 수집 전달 진행중</div>
+      <div class="achievement-item"><strong>대외채널 강화로 타겟 볼륨 확대 :</strong> LinkedIn 글로벌 채널 전략 수립· 작년 대비 1만명, 연초 대비 팔로워 5,860명 up(현 1.5k)·노출 537,618회·클릭 33,800건 달성, 인스타그램은 콘텐츠 풀 15개 구축, 5월 4일부터 본격진행, 핵심 콘텐츠 개발 진행</div>
+      <div class="achievement-item"><strong>홍보 DAX 제작 역량 내재화 :</strong> 기획·리서치·팩트체크·브랜드보이스·SEO·디자인·웹페이지·교열 등 전 제작 단계를 커버하는 <a href="https://drive.google.com/file/d/1Xzv8l6qcYd1x8xigPJu4xeZep3zgVeF7/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">AI Agent </a>팀 및 홈페이지 PM Agent 팀을 자체 구축, 외부 의존도 감소·제작 속도 개선 ex) <a href="https://annotator-coder.github.io/artfesta59/" target="_blank" style="color:inherit;text-decoration:underline;">웹전시관 자체구축</a></div>
+      <div class="achievement-item"><strong>신규 캠페인 — Art Festa :</strong> 정유업에 대한 사내외 인식 개선 및 임직원 자긍심 고취를 목표로 'GS칼텍스 Art Festa' CSR 캠페인 기획·추진, 임직원 참여자 110명+ 모집 및 온라인 전시회 연계 (진행 중) <a href="https://drive.google.com/file/d/1lRQWPwIILrCfUNhFx3JAhplVT3qb4c1Z/view?usp=drive_link" target="_blank" style="color:inherit;text-decoration:underline;">참고)art festa 캠페인</a></div>
+      <div class="achievement-item"><strong>중동 사태 언론 대응 체계 구축 :</strong> 이슈대응 루프 마스터 페이지 기반 언론대응 시스템 구축, 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 참고자료 선제 제공으로 중앙, 헤럴드, 아주, 머투 등 기획 19건 반영, 업계전문지 모임 정례화로 부정이슈 차단</div>
       <div class="achievement-item"><strong>팀간 CF 협업 — 배구단 우승 기념 :</strong> GS타워 B1~1F 사진전(30점 큐레이션·포토월)·헌정 영상·임직원 이벤트를 기획·운영하여 우승 모멘텀을 활용한 조직 자긍심 고취 및 브랜드 경험 제공</div>
     </div>
   </div>
@@ -243,6 +243,7 @@
   <button class="filter-btn" onclick="filterCategory('campaign')" data-cat="campaign">캠페인 / 이벤트</button>
   <button class="filter-btn" onclick="filterCategory('pi')"       data-cat="pi">PI 업무</button>
   <button class="filter-btn" onclick="filterCategory('etc')"      data-cat="etc">기타(스팟성)</button>
+  <button class="filter-btn" onclick="filterCategory('dax')"      data-cat="dax">DAX / AI 역량</button>
   <div class="filter-divider"></div>
   <button class="vm-filter-btn" id="btn-vm" onclick="filterVM()">★ VM 전략과업</button>
 </div>
@@ -270,6 +271,7 @@ const CAT = {
   campaign: { label: '캠페인 / 이벤트', color: '#d35400', bg: '#fff0e6' },
   pi:       { label: 'PI 업무',        color: '#2980b9', bg: '#eaf4fc' },
   etc:      { label: '기타(스팟성)',   color: '#7f8c8d', bg: '#f2f3f4' },
+  dax:      { label: 'DAX / AI 역량', color: '#2c3e50', bg: '#eaecee' },
 };
 
 // ─────────────────────────────────────────────
@@ -350,7 +352,7 @@ const QUARTERS = {
           {
             cat: 'pr',
             title: '대언론 관계 구축 및 부정 이슈 대응',
-            detail: '업계 전문지 정례 모임화 → 중동전쟁 관련 부정 이슈(폭리 논란·최고가격제·사후정산) 차단 / 기사 반영 7건',
+            detail: '업계 전문지(에너지플랫폼뉴스, 에너지신문, 뉴시안 등 전문매체) 정례 모임화(분기 1회) → 중동전쟁 관련 부정 이슈(폭리 논란·최고가격제·사후정산) 차단 / 기사 반영 7건',
             tags: ['언론관계', '이슈대응', '중동전쟁']
           },
           {
@@ -360,9 +362,15 @@ const QUARTERS = {
             tags: ['보도자료', 'CCUS', '현대카드 PLCC', '35건']
           },
           {
+            cat: 'pr',
+            title: '중동사태 언론 대응',
+            detail: '주요 매체 대상 회사 언론기획 참고자료 선제 제공 및 기사화 추진, 13건 실적 기록',
+            tags: ['보도자료', 'CCUS', '현대카드 PLCC', '35건']
+          },
+          {
             cat: 'sports',
             title: '바둑팀 및 프로기전 운영',
-            detail: '바둑팀·배구팀 경기 관람 콘텐츠 제작(1월), 프로기전 결승 홍보영상 제작 예정(발랄 협업, 6월)',
+            detail: '바둑팀·배구팀 경기 관람 콘텐츠 제작(1월),  바둑팀 운영전략 리뷰 및 개선안 도출(5월), 프로기전 결승 홍보영상 제작 예정(발랄 협업, 6월)',
             tags: ['바둑', '프로기전', '콘텐츠']
           },
         ]
@@ -372,27 +380,27 @@ const QUARTERS = {
         tasks: [
           {
             cat: 'csr', vm: true,
-            title: '서울숲 배움정원 (VM 기준 CSR)',
+            title: '서울숲 배움정원 (CSR)',
             detail: '배움정원 조성 완료(4월)·서울국제정원박람회 참가(5~10월) / 임직원 가드닝 봉사 40명 확정(5월)·보도자료·콘텐츠 / 어린이 생태 드로잉 교실(6~8월, 회차별 진행) — 콘텐츠 1차(5월), 보도자료(6월), 콘텐츠 2차(8월)',
-            tags: ['VM 기준', '서울숲', '가드닝', '박람회', '어린이 교실']
+            tags: ['서울숲', '가드닝', '박람회', '어린이 교실']
           },
           {
             cat: 'sns',
-            title: '홈페이지 유지관리 (VM 연관)',
+            title: '홈페이지 유지관리',
             detail: '마케팅 4관왕 팝업·배구 우승 팝업·보고서·재무정보·국영문 업데이트 등 17건',
-            tags: ['VM 연관', '홈페이지', '디지털', '17건']
+            tags: ['홈페이지', '디지털', '17건']
           },
           {
             cat: 'csr',
             title: '사내 CSR 전수조사 및 GSC 장학회 콘텐츠',
             detail: '전사 CSR 활동 전수조사 완료(4월) / GSC 장학회 콘텐츠 제작 완료',
-            tags: ['VM 연관', 'CSR 전수조사', 'GSC 장학회']
+            tags: [ 'CSR 전수조사', 'GSC 장학회']
           },
           {
             cat: 'campaign',
             title: 'GS칼텍스 ART FESTA 임직원 이벤트',
-            detail: '임직원 참여자 모집 중(4/28 마감, 현재 97명 신청) → 보도자료·콘텐츠·온라인 전시회(5월)',
-            tags: ['Art Festa', '이벤트', '97명']
+            detail: '임직원 참여자 모집 → 보도자료·콘텐츠·온라인 전시회(5월)',
+            tags: ['Art Festa', '캠페인', '임직원 참여']
           },
           {
             cat: 'etc',
@@ -415,7 +423,7 @@ const QUARTERS = {
             cat: 'csr',
             title: 'CSR 활동 — 구룡마을·에너지효율화·FC서울',
             detail: '구룡마을 화재 긴급지원 1천만원(1월)·콘텐츠(3월)·감사패(5월) / 에너지효율화 6억 조기 집행(2월)·보도자료 준비 / FC서울 다문화 축구교실 후원 1천만원, 교류전(5~7월)',
-            tags: ['구룡마을', '에너지효율화', 'FC서울', 'VM 기준']
+            tags: ['구룡마을', '에너지효율화', 'FC서울', 'CSR 활동']
           },
           {
             cat: 'pr',
@@ -436,14 +444,14 @@ const QUARTERS = {
         tasks: [
           {
             cat: 'pr',
-            title: '보도자료 배포',
+            title: '정유업 인식 개선 및 사업관련 언론 보도 기획',
             detail: '베올리아 MOU 체결 보도자료 / 네이버페이 주유 적립 보도자료',
             tags: ['베올리아', 'MOU', '네이버페이', '주유 적립']
           },
           {
             cat: 'pr',
-            title: '언론 대응',
-            detail: '중동 사태 및 국내 취재 대응 (중앙·한경·서경·파뉴·머투·뉴시스·뉴스1 등) / 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 자료 제공 및 기사화 유도',
+            title: '중동 사태 언론 대응',
+            detail: '중동 사태 및 국내 취재 대응 (중앙·한경·서경·파뉴·머투·뉴시스·뉴스1 등) / 최고가격제·전속계약제·사후정산제·국내외 휘발유 가격 비교 자료 제공 및 7건 기사화 유도',
             tags: ['중동 사태', '언론 대응', '최고가격제', '가격 비교']
           },
           {
@@ -452,6 +460,12 @@ const QUARTERS = {
             detail: 'VM SNS 카테고리 — 인스타그램 게시용 카드뉴스 소재 발굴 및 아이템 풀 지속 축적',
             tags: ['VM SNS', '인스타그램', '카드뉴스']
           },
+          {
+            cat: 'dax', vm: true,
+            title: '부문 DAX 제작 역량 내재화',
+            detail: 'AI Agent 팀 구축 / 위기대응 시스템 구축 진행',
+            tags: ['dax', '위기대응', 'AI Agent']
+          }
         ]
       },
       {
@@ -460,7 +474,7 @@ const QUARTERS = {
           {
             cat: 'sns', vm: true,
             title: '홈페이지 리뉴얼 추진 — Corporate Information Hub 구축',
-            detail: '1Q: 수행사 서치·컨택·미팅(5개사↑), RFI 준비 / 5월 비딩·수행사 선정 → 구조·콘텐츠 전략 설계 및 개발 착수 예정 / \'27년 1Q 오픈 목표 (ongoing)',
+            detail: '1Q: 수행사 서치·컨택·미팅(7개사↑), RFI 준비 / 5월 비딩·수행사 선정 → 구조·콘텐츠 전략 설계 및 개발 착수 예정 / \'27년 1Q 오픈 목표 (ongoing)',
             tags: ['VM 기준', '홈페이지 리뉴얼', 'RFI', "'27년 오픈"]
           },
           {
@@ -481,6 +495,12 @@ const QUARTERS = {
             detail: 'GS타워 B1~1F 공간 활용 / 사진 30점 큐레이션·관람 동선 구성·포토월 운영 / 임직원·방문객 대상 브랜드 경험 및 조직 자긍심 제고',
             tags: ['배구단', '사진전', '포토월', '완료']
           },
+          {
+            cat: 'dax', vm: true,
+            title: '부문 DAX 역량 강화',
+            detail: '콘텐츠 AI Agent 팀 구축 / 콘텐츠 기획, 모니터 및 제안 자동화로 제작 효율성 및 품질 개선',
+            tags: ['dax', '미디어허브', 'AI Agent', '콘텐츠 자동화']
+          }
         ]
       },
     ]
