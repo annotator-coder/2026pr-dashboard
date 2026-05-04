@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Looker Studio 구성안 — 부문장 보고용</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #F1F3F4; color: #202124; font-size: 13px; }
+
+  /* ── 전체 컨테이너 ── */
+  .report { width: 1200px; margin: 24px auto; display: grid; gap: 12px; }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, #1A237E, #283593);
+    color: #fff; border-radius: 8px; padding: 20px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .header .meta { font-size: 11px; opacity: .7; margin-top: 4px; }
+  .header .badge {
+    background: rgba(255,255,255,.15); border-radius: 6px;
+    padding: 8px 16px; text-align: center;
+  }
+  .header .badge .score { font-size: 32px; font-weight: 800; color: #90CAF9; }
+  .header .badge .label { font-size: 11px; opacity: .8; }
+  .header .filter-bar { display: flex; gap: 8px; align-items: center; }
+  .filter-chip {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px; padding: 4px 12px; font-size: 11px; cursor: pointer;
+  }
+  .filter-chip.active { background: rgba(255,255,255,.3); }
+
+  /* ── 카드 공통 ── */
+  .card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .card-title { font-size: 11px; font-weight: 600; color: #5F6368; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+
+  /* ── Row 1: 스코어카드 4개 ── */
+  .row-scorecards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .scorecard { text-align: center; padding: 14px 12px; }
+  .scorecard .value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .scorecard .label { font-size: 11px; color: #5F6368; margin-top: 6px; }
+  .scorecard .delta { font-size: 11px; margin-top: 4px; }
+  .green  { color: #1B5E20; }
+  .amber  { color: #E65100; }
+  .red    { color: #B71C1C; }
+  .blue   { color: #1A237E; }
+  .dot-green  { display:inline-block; width:8px; height:8px; border-radius:50%; background:#4CAF50; margin-right:4px; }
+  .dot-amber  { display:inline-block; width:8px; height:8px; border-radius:50%; background:#FF9800; margin-right:4px; }
+  .dot-red    { display:inline-block; width:8px; height:8px; border-radius:50%; background:#F44336; margin-right:4px; }
+
+  /* ── Row 2: 막대 + 테이블 ── */
+  .row-main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* 가로 막대 차트 */
+  .bar-list { display: flex; flex-direction: column; gap: 10px; }
+  .bar-item { display: flex; align-items: center; gap: 8px; }
+  .bar-label { width: 160px; font-size: 11px; color: #3C4043; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 18px; background: #F1F3F4; border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+  .bar-pct { width: 36px; font-size: 11px; font-weight: 700; text-align: right; flex-shrink: 0; }
+  .bg-green { background: #66BB6A; }
+  .bg-amber { background: #FFA726; }
+  .bg-red   { background: #EF5350; }
+  .bg-blue  { background: #42A5F5; }
+  .target-line {
+    position: absolute; right: 0; top: 0; width: 2px; height: 100%;
+    background: #1A237E; opacity: .4;
+  }
+
+  /* KPI 현황 테이블 */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #F8F9FA; color: #5F6368; font-weight: 600; padding: 7px 10px; text-align: left; font-size: 11px; border-bottom: 2px solid #E8EAED; }
+  td { padding: 7px 10px; border-bottom: 1px solid #F1F3F4; }
+  tr:last-child td { border-bottom: none; }
+  .rag-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+  .rag-green  { background: #E8F5E9; color: #1B5E20; }
+  .rag-amber  { background: #FFF8E1; color: #E65100; }
+  .rag-red    { background: #FFEBEE; color: #B71C1C; }
+  .weight-badge { background: #E8EAF6; color: #3949AB; border-radius: 10px; padding: 2px 6px; font-size: 10px; }
+
+  /* ── Row 3: 추이 + SNS ── */
+  .row-bottom { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
+
+  /* SVG 꺾은선 차트 */
+  .chart-area { width: 100%; height: 160px; }
+
+  /* SNS 채널 */
+  .sns-list { display: flex; flex-direction: column; gap: 8px; }
+  .sns-item { display: flex; align-items: center; gap: 8px; }
+  .sns-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .sns-info { flex: 1; }
+  .sns-name { font-size: 11px; font-weight: 600; color: #3C4043; }
+  .sns-bar-track { height: 8px; background: #F1F3F4; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .sns-bar-fill { height: 100%; border-radius: 4px; }
+  .sns-pct { font-size: 11px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* ── 범례 & 노트 ── */
+  .legend { display: flex; gap: 16px; align-items: center; font-size: 11px; color: #5F6368; }
+  .note-box { background: #E8EAF6; border-left: 3px solid #3949AB; border-radius: 4px; padding: 8px 12px; font-size: 11px; color: #283593; }
+
+  /* ── 주석 오버레이 ── */
+  .annotation {
+    position: relative;
+  }
+  .ann-badge {
+    display: inline-block; background: #E91E63; color: #fff;
+    font-size: 10px; font-weight: 700; border-radius: 10px;
+    padding: 2px 7px; margin-left: 6px; vertical-align: middle;
+  }
+  .section-label {
+    font-size: 10px; font-weight: 700; color: #fff;
+    background: #3949AB; border-radius: 4px; padding: 2px 8px;
+    display: inline-block; margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="report">
+
+  <!-- ① 헤더 -->
+  <div class="header">
+    <div>
+      <div class="section-label">① 헤더 — 보고서 타이틀 + 필터</div>
+      <h1>GS칼텍스 홍보부문 KPI Dashboard 2026</h1>
+      <div class="meta">마지막 갱신: 2026-05-02 09:00 &nbsp;|&nbsp; 기준: 1Q 마감</div>
+      <div class="filter-bar" style="margin-top:10px;">
+        <span style="font-size:11px; opacity:.7;">분기 필터:</span>
+        <span class="filter-chip active">전체</span>
+        <span class="filter-chip">1Q</span>
+        <span class="filter-chip">2Q</span>
+        <span class="filter-chip">3Q</span>
+        <span class="filter-chip">4Q</span>
+        &nbsp;|&nbsp;
+        <span style="font-size:11px; opacity:.7;">카테고리:</span>
+        <span class="filter-chip active">전체</span>
+        <span class="filter-chip">정성</span>
+        <span class="filter-chip">정량</span>
+      </div>
+    </div>
+    <div class="badge">
+      <div class="score">78.4<span style="font-size:18px;">%</span></div>
+      <div class="label">종합 KPI 달성률</div>
+      <div style="font-size:13px; margin-top:4px; color:#FFD54F; font-weight:700;">B 등급</div>
+    </div>
+  </div>
+
+  <!-- ② 스코어카드 4개 -->
+  <div style="margin-top:0;">
+    <div class="section-label" style="margin-bottom:6px;">② 스코어카드 — 핵심 현황 요약 (4개)</div>
+    <div class="row-scorecards">
+      <div class="card scorecard">
+        <div class="card-title">목표 궤도 KPI</div>
+        <div class="value green">4</div>
+        <div class="label"><span class="dot-green"></span>Green (≥90%)</div>
+        <div class="delta green">▲ 전분기 대비 +1</div>
+      </div>
+      <div class="card scorecard">
+        <div class="card-title">주의 KPI</div>
+        <div class="value amber">3</div>
+        <div class="label"><span class="dot-amber"></span>Amber (70~89%)</div>
+        <div class="delta amber">━ 변동 없음</div>
+      </div>
+      <div class="card scorecard">
+        <div class="card-title">목표 미달 KPI</div>
+        <div class="value red">2</div>
+        <div class="label"><span class="dot-red"></span>Red (&lt;70%)</div>
+        <div class="delta red">▼ 전분기 대비 -1</div>
+      </div>
+      <div class="card scorecard">
+        <div class="card-title">DAX 절감 FTE</div>
+        <div class="value blue">1.3</div>
+        <div class="label">누적 FTE / 목표 2.0</div>
+        <div class="delta" style="color:#5F6368;">진행률 65%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 막대 차트 + ④ KPI 테이블 -->
+  <div>
+    <div class="section-label" style="margin-bottom:6px;">③ KPI별 달성률 막대 + ④ KPI 현황 테이블</div>
+    <div class="row-main">
+
+      <!-- 가로 막대 차트 -->
+      <div class="card">
+        <div class="card-title">KPI별 달성률 (%) <span class="ann-badge">가로 막대</span></div>
+        <div class="bar-list">
+          <div class="bar-item">
+            <div class="bar-label">③ 홈페이지 고도화 <span class="weight-badge">20%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-amber" style="width:72%"></div><div class="target-line"></div></div>
+            <div class="bar-pct amber">72%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">① 사사 편찬 <span class="weight-badge">15%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-green" style="width:92%"></div><div class="target-line"></div></div>
+            <div class="bar-pct green">92%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">⑥ Commercial PR <span class="weight-badge">15%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-green" style="width:91%"></div><div class="target-line"></div></div>
+            <div class="bar-pct green">91%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">④ External Comm <span class="weight-badge">15%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-amber" style="width:78%"></div><div class="target-line"></div></div>
+            <div class="bar-pct amber">78%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">② JV Case Study <span class="weight-badge">10%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-green" style="width:90%"></div><div class="target-line"></div></div>
+            <div class="bar-pct green">90%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">⑤ DAX 절감 <span class="weight-badge">10%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-red" style="width:65%"></div><div class="target-line"></div></div>
+            <div class="bar-pct red">65%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">⑦ Internal Comm <span class="weight-badge">10%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-amber" style="width:75%"></div><div class="target-line"></div></div>
+            <div class="bar-pct amber">75%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">외부 수상 <span class="weight-badge">5%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-red" style="width:50%"></div><div class="target-line"></div></div>
+            <div class="bar-pct red">50%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">CSR Milestone <span class="weight-badge">5%</span></div>
+            <div class="bar-track"><div class="bar-fill bg-green" style="width:95%"></div><div class="target-line"></div></div>
+            <div class="bar-pct green">95%</div>
+          </div>
+        </div>
+        <div class="legend" style="margin-top:12px;">
+          <span><span class="dot-green"></span>Green ≥90%</span>
+          <span><span class="dot-amber"></span>Amber 70~89%</span>
+          <span><span class="dot-red"></span>Red &lt;70%</span>
+          <span style="color:#1A237E;">│ 목표선(100%)</span>
+        </div>
+      </div>
+
+      <!-- KPI 현황 테이블 -->
+      <div class="card">
+        <div class="card-title">KPI 현황 상세 <span class="ann-badge">테이블</span></div>
+        <table>
+          <thead>
+            <tr>
+              <th>KPI명</th>
+              <th>비중</th>
+              <th>달성률</th>
+              <th>RAG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>사사 편찬</td><td><span class="weight-badge">15%</span></td><td><b>92%</b></td><td><span class="rag-badge rag-green">Green</span></td></tr>
+            <tr><td>JV Case Study</td><td><span class="weight-badge">10%</span></td><td><b>90%</b></td><td><span class="rag-badge rag-green">Green</span></td></tr>
+            <tr><td>홈페이지 고도화</td><td><span class="weight-badge">20%</span></td><td><b>72%</b></td><td><span class="rag-badge rag-amber">Amber</span></td></tr>
+            <tr><td>External Comm</td><td><span class="weight-badge">15%</span></td><td><b>78%</b></td><td><span class="rag-badge rag-amber">Amber</span></td></tr>
+            <tr><td>DAX 절감</td><td><span class="weight-badge">10%</span></td><td><b>65%</b></td><td><span class="rag-badge rag-red">Red</span></td></tr>
+            <tr><td>Commercial PR</td><td><span class="weight-badge">15%</span></td><td><b>91%</b></td><td><span class="rag-badge rag-green">Green</span></td></tr>
+            <tr><td>외부 수상</td><td><span class="weight-badge">5%</span></td><td><b>50%</b></td><td><span class="rag-badge rag-red">Red</span></td></tr>
+            <tr><td>Internal Comm</td><td><span class="weight-badge">10%</span></td><td><b>75%</b></td><td><span class="rag-badge rag-amber">Amber</span></td></tr>
+            <tr><td>CSR Milestone</td><td><span class="weight-badge">5%</span></td><td><b>95%</b></td><td><span class="rag-badge rag-green">Green</span></td></tr>
+            <tr style="background:#E8EAF6;"><td><b>종합 (가중평균)</b></td><td>—</td><td><b>78.4%</b></td><td><span class="rag-badge" style="background:#C5CAE9;color:#1A237E;">B 등급</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ 추이 + ⑥ SNS -->
+  <div>
+    <div class="section-label" style="margin-bottom:6px;">⑤ 월별 추이 꺾은선 + ⑥ SNS 채널 현황</div>
+    <div class="row-bottom">
+
+      <!-- 꺾은선 추이 차트 -->
+      <div class="card">
+        <div class="card-title">월별 KPI 달성률 추이 <span class="ann-badge">꺾은선</span></div>
+        <svg class="chart-area" viewBox="0 0 580 160">
+          <!-- 격자 -->
+          <line x1="40" y1="10" x2="40" y2="130" stroke="#E8EAED" stroke-width="1"/>
+          <line x1="40" y1="10" x2="580" y2="10" stroke="#E8EAED" stroke-width="1"/>
+          <line x1="40" y1="37" x2="580" y2="37" stroke="#E8EAED" stroke-width="1"/>
+          <line x1="40" y1="64" x2="580" y2="64" stroke="#E8EAED" stroke-width="1"/>
+          <line x1="40" y1="91" x2="580" y2="91" stroke="#E8EAED" stroke-width="1"/>
+          <line x1="40" y1="118" x2="580" y2="118" stroke="#E8EAED" stroke-width="1"/>
+          <!-- Y축 레이블 -->
+          <text x="32" y="13" font-size="9" fill="#9AA0A6" text-anchor="end">100</text>
+          <text x="32" y="40" font-size="9" fill="#9AA0A6" text-anchor="end">90</text>
+          <text x="32" y="67" font-size="9" fill="#9AA0A6" text-anchor="end">80</text>
+          <text x="32" y="94" font-size="9" fill="#9AA0A6" text-anchor="end">70</text>
+          <text x="32" y="121" font-size="9" fill="#9AA0A6" text-anchor="end">60</text>
+          <!-- 목표선 90% -->
+          <line x1="40" y1="37" x2="580" y2="37" stroke="#1A237E" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+          <text x="582" y="40" font-size="9" fill="#1A237E">목표</text>
+          <!-- X축 레이블 -->
+          <text x="93"  y="145" font-size="9" fill="#9AA0A6" text-anchor="middle">1월</text>
+          <text x="147" y="145" font-size="9" fill="#9AA0A6" text-anchor="middle">2월</text>
+          <text x="201" y="145" font-size="9" fill="#9AA0A6" text-anchor="middle">3월</text>
+          <text x="255" y="145" font-size="9" fill="#9AA0A6" text-anchor="middle">4월</text>
+          <text x="309" y="145" font-size="9" fill="#9AA0A6" text-anchor="middle">5월</text>
+          <!-- 종합 달성률 꺾은선 -->
+          <polyline points="93,104 147,94 201,88 255,84 309,80"
+            fill="none" stroke="#1A237E" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- 점 -->
+          <circle cx="93"  cy="104" r="4" fill="#1A237E"/>
+          <circle cx="147" cy="94"  r="4" fill="#1A237E"/>
+          <circle cx="201" cy="88"  r="4" fill="#1A237E"/>
+          <circle cx="255" cy="84"  r="4" fill="#1A237E"/>
+          <circle cx="309" cy="80"  r="4" fill="#1A237E"/>
+          <!-- 값 레이블 -->
+          <text x="93"  y="100" font-size="9" fill="#1A237E" text-anchor="middle">62%</text>
+          <text x="147" y="90"  font-size="9" fill="#1A237E" text-anchor="middle">68%</text>
+          <text x="201" y="84"  font-size="9" fill="#1A237E" text-anchor="middle">72%</text>
+          <text x="255" y="80"  font-size="9" fill="#1A237E" text-anchor="middle">75%</text>
+          <text x="309" y="76"  font-size="9" fill="#1A237E" text-anchor="middle">78%</text>
+          <!-- 범례 -->
+          <line x1="50" y1="155" x2="70" y2="155" stroke="#1A237E" stroke-width="2.5"/>
+          <circle cx="60" cy="155" r="3" fill="#1A237E"/>
+          <text x="74" y="158" font-size="9" fill="#5F6368">종합 달성률</text>
+        </svg>
+        <div class="note-box" style="margin-top:8px;">
+          💡 <b>Looker Studio 설정:</b> 날짜 필드 = <code>날짜</code> | 지표 = <code>달성률(%)</code> | 분류(선 색상) = <code>KPI_ID</code>
+        </div>
+      </div>
+
+      <!-- SNS 채널 현황 -->
+      <div class="card">
+        <div class="card-title">SNS 채널별 현황 <span class="ann-badge">그룹 막대</span></div>
+        <div class="sns-list">
+          <div class="sns-item">
+            <div class="sns-icon" style="background:#FCE4EC;">📸</div>
+            <div class="sns-info">
+              <div class="sns-name">인스타그램 <span style="font-size:10px; color:#5F6368;">조회수 증가율</span></div>
+              <div class="sns-bar-track"><div class="sns-bar-fill bg-amber" style="width:78%;"></div></div>
+            </div>
+            <div class="sns-pct amber">78%</div>
+          </div>
+          <div class="sns-item">
+            <div class="sns-icon" style="background:#FCE4EC;">📸</div>
+            <div class="sns-info">
+              <div class="sns-name">인스타그램 <span style="font-size:10px; color:#5F6368;">비팔로워 비중</span></div>
+              <div class="sns-bar-track"><div class="sns-bar-fill bg-green" style="width:92%;"></div></div>
+            </div>
+            <div class="sns-pct green">92%</div>
+          </div>
+          <div class="sns-item">
+            <div class="sns-icon" style="background:#E3F2FD;">💼</div>
+            <div class="sns-info">
+              <div class="sns-name">링크드인 <span style="font-size:10px; color:#5F6368;">팔로워 달성률</span></div>
+              <div class="sns-bar-track"><div class="sns-bar-fill bg-amber" style="width:74%;"></div></div>
+            </div>
+            <div class="sns-pct amber">74%</div>
+          </div>
+          <div class="sns-item">
+            <div class="sns-icon" style="background:#FFEBEE;">▶️</div>
+            <div class="sns-info">
+              <div class="sns-name">유튜브 <span style="font-size:10px; color:#5F6368;">구독자 증가율</span></div>
+              <div class="sns-bar-track"><div class="sns-bar-fill bg-red" style="width:60%;"></div></div>
+            </div>
+            <div class="sns-pct red">60%</div>
+          </div>
+        </div>
+        <div class="note-box" style="margin-top:12px;">
+          💡 <b>Looker Studio 설정:</b> 데이터 = <code>📊 Looker_SNS현황</code> | 분류 = <code>채널</code> | 지표 = <code>달성률(%)</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하단 안내 -->
+  <div class="card" style="background:#E8EAF6; border-left: 4px solid #3949AB;">
+    <div style="font-size:12px; color:#283593; font-weight:700; margin-bottom:8px;">📋 Looker Studio 구성 요약</div>
+    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:12px; font-size:11px; color:#3C4043;">
+      <div><b>① 헤더</b><br>텍스트 + 날짜 컨트롤<br>분기·카테고리 필터</div>
+      <div><b>② 스코어카드 ×4</b><br>종합달성률 / Green수 / Amber수 / FTE<br>데이터: Looker_KPI현황</div>
+      <div><b>③ 가로 막대</b><br>KPI별 달성률 비교<br>색상 규칙: RAG 필드</div>
+      <div><b>④ 테이블</b><br>KPI 상세 + RAG 뱃지<br>정렬: 비중(%) 내림차순</div>
+      <div><b>⑤ 꺾은선 추이</b><br>월별 달성률 변화<br>데이터: Looker_KPI추이</div>
+      <div><b>⑥ SNS 그룹 막대</b><br>채널별 지표 비교<br>데이터: Looker_SNS현황</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

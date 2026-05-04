@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GS칼텍스 홍보부문 KPI Dashboard 2026</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#F1F3F4;color:#202124;font-size:13px}
+  .wrap{max-width:1160px;margin:20px auto;padding:0 16px;display:grid;gap:12px}
+
+  /* 헤더 */
+  .header{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;border-radius:8px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .header .meta{font-size:11px;opacity:.7;margin-top:4px}
+  .score-badge{background:rgba(255,255,255,.15);border-radius:8px;padding:10px 20px;text-align:center}
+  .score-badge .val{font-size:34px;font-weight:800;color:#90CAF9;line-height:1}
+  .score-badge .grade{font-size:13px;color:#FFD54F;font-weight:700;margin-top:4px}
+  .score-badge .lbl{font-size:10px;opacity:.7;margin-top:2px}
+
+  /* 카드 */
+  .card{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .card-title{font-size:10px;font-weight:700;color:#5F6368;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+  /* 스코어카드 */
+  .row-sc{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .sc{text-align:center;padding:12px 8px}
+  .sc .v{font-size:30px;font-weight:800;line-height:1}
+  .sc .l{font-size:11px;color:#5F6368;margin-top:5px}
+  .sc .d{font-size:11px;margin-top:3px}
+
+  /* 메인 행 */
+  .row-main{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* 막대 */
+  .bar-list{display:flex;flex-direction:column;gap:9px}
+  .bar-item{display:flex;align-items:center;gap:8px}
+  .bar-lbl{width:158px;font-size:11px;color:#3C4043;flex-shrink:0;display:flex;align-items:center;gap:4px}
+  .bar-track{flex:1;height:16px;background:#F1F3F4;border-radius:4px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+  .bar-pct{width:34px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+  .w-badge{background:#E8EAF6;color:#3949AB;border-radius:8px;padding:1px 5px;font-size:9px;white-space:nowrap}
+
+  /* 테이블 */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:#F8F9FA;color:#5F6368;font-weight:600;padding:7px 10px;text-align:left;font-size:10px;border-bottom:2px solid #E8EAED}
+  td{padding:7px 10px;border-bottom:1px solid #F1F3F4}
+  tr:last-child td{border-bottom:none}
+  .rb{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700}
+  .rg{background:#E8F5E9;color:#1B5E20}
+  .ra{background:#FFF8E1;color:#E65100}
+  .rr{background:#FFEBEE;color:#B71C1C}
+  .rb-total{background:#C5CAE9;color:#1A237E}
+  .total-row{background:#E8EAF6}
+
+  /* 하단 행 */
+  .row-bot{display:grid;grid-template-columns:3fr 2fr;gap:12px}
+
+  /* SVG 차트 */
+  .chart-svg{width:100%;overflow:visible}
+
+  /* SNS */
+  .sns-list{display:flex;flex-direction:column;gap:10px}
+  .sns-item{display:flex;align-items:center;gap:8px}
+  .sns-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .sns-body{flex:1}
+  .sns-nm{font-size:11px;font-weight:600;color:#3C4043}
+  .sns-sub{font-size:10px;color:#9AA0A6}
+  .sns-track{height:8px;background:#F1F3F4;border-radius:4px;overflow:hidden;margin-top:4px}
+  .sns-fill{height:100%;border-radius:4px}
+  .sns-pct{width:34px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+
+  /* 색상 */
+  .g{color:#1B5E20}.a{color:#E65100}.r{color:#B71C1C}.b{color:#1A237E}
+  .bg-g{background:#66BB6A}.bg-a{background:#FFA726}.bg-r{background:#EF5350}.bg-b{background:#42A5F5}
+
+  /* 범례 */
+  .legend{display:flex;gap:14px;align-items:center;font-size:10px;color:#5F6368;margin-top:10px;flex-wrap:wrap}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px}
+
+  /* 노트 */
+  .note{background:#E8EAF6;border-left:3px solid #3949AB;border-radius:4px;padding:7px 12px;font-size:11px;color:#283593;margin-top:10px}
+
+  /* 반응형 */
+  @media(max-width:860px){
+    .row-main,.row-bot{grid-template-columns:1fr}
+    .row-sc{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<script>const D = <?!= payload ?>;</script>
+<div class="wrap" id="app"></div>
+
+<script>
+const rag = r => r === 'Green' ? 'g' : r === 'Amber' ? 'a' : 'r';
+const ragBadge = r => `<span class="rb r${rag(r)}">${r}</span>`;
+const ragBg = r => `bg-${rag(r)}`;
+const fmt = n => typeof n === 'number' ? Math.round(n * 10) / 10 : n;
+
+function render() {
+  const { overall, kpis, snsList, trend, updatedAt, ragCount } = D;
+
+  // ── 헤더 ──
+  let html = `
+  <div class="header">
+    <div>
+      <h1>GS칼텍스 홍보부문 KPI Dashboard 2026</h1>
+      <div class="meta">마지막 갱신: ${updatedAt}</div>
+    </div>
+    <div class="score-badge">
+      <div class="val">${fmt(overall.rate)}<span style="font-size:18px">%</span></div>
+      <div class="grade">${overall.grade}</div>
+      <div class="lbl">종합 KPI 달성률</div>
+    </div>
+  </div>`;
+
+  // ── 스코어카드 ──
+  const dax = kpis.find(k => k.id === 'KPI_4');
+  html += `<div class="row-sc">
+    <div class="card sc">
+      <div class="card-title">목표 궤도 KPI</div>
+      <div class="v g">${ragCount.Green}</div>
+      <div class="l"><span class="dot" style="background:#4CAF50"></span>Green ≥90%</div>
+    </div>
+    <div class="card sc">
+      <div class="card-title">주의 KPI</div>
+      <div class="v a">${ragCount.Amber}</div>
+      <div class="l"><span class="dot" style="background:#FF9800"></span>Amber 70~89%</div>
+    </div>
+    <div class="card sc">
+      <div class="card-title">목표 미달 KPI</div>
+      <div class="v r">${ragCount.Red}</div>
+      <div class="l"><span class="dot" style="background:#F44336"></span>Red &lt;70%</div>
+    </div>
+    <div class="card sc">
+      <div class="card-title">DAX 절감 FTE</div>
+      <div class="v b">${dax ? dax.display : '—'}</div>
+      <div class="l">목표 ${dax ? dax.target : '—'}</div>
+    </div>
+  </div>`;
+
+  // ── 막대 + 테이블 ──
+  // 비중 내림차순 정렬
+  const sorted = [...kpis].sort((a, b) => b.weight - a.weight);
+
+  let bars = sorted.map(k => `
+    <div class="bar-item">
+      <div class="bar-lbl">
+        <span>${k.name}</span>
+        <span class="w-badge">${k.weight}%</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill ${ragBg(k.rag)}" style="width:${Math.min(k.rate,100)}%"></div>
+      </div>
+      <div class="bar-pct ${rag(k.rag)}">${fmt(k.rate)}%</div>
+    </div>`).join('');
+
+  let tableRows = sorted.map(k => `
+    <tr>
+      <td>${k.name}</td>
+      <td><span class="w-badge">${k.weight}%</span></td>
+      <td><b>${fmt(k.rate)}%</b></td>
+      <td>${k.display}</td>
+      <td>${ragBadge(k.rag)}</td>
+    </tr>`).join('');
+
+  tableRows += `<tr class="total-row">
+    <td><b>종합 (가중평균)</b></td><td>—</td>
+    <td><b>${fmt(overall.rate)}%</b></td><td>—</td>
+    <td><span class="rb rb-total">${overall.grade}</span></td>
+  </tr>`;
+
+  html += `<div class="row-main">
+    <div class="card">
+      <div class="card-title">KPI별 달성률 (%)</div>
+      <div class="bar-list">${bars}</div>
+      <div class="legend">
+        <span><span class="dot" style="background:#4CAF50"></span>Green ≥90%</span>
+        <span><span class="dot" style="background:#FF9800"></span>Amber 70~89%</span>
+        <span><span class="dot" style="background:#F44336"></span>Red &lt;70%</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">KPI 현황 상세</div>
+      <table>
+        <thead><tr><th>KPI명</th><th>비중</th><th>달성률</th><th>현재값</th><th>RAG</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  </div>`;
+
+  // ── 추이 SVG + SNS ──
+  html += `<div class="row-bot">
+    <div class="card">
+      <div class="card-title">월별 종합 달성률 추이</div>
+      ${buildTrendSvg(trend)}
+    </div>
+    <div class="card">
+      <div class="card-title">SNS 채널별 현황</div>
+      ${buildSnsList(snsList)}
+    </div>
+  </div>`;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+function buildTrendSvg(trend) {
+  if (!trend || trend.length === 0) {
+    return '<div class="note">추이 데이터가 없습니다. refreshLookerFeed()를 실행한 뒤 재배포하세요.</div>';
+  }
+
+  const W = 520, H = 150, PL = 40, PR = 20, PT = 14, PB = 30;
+  const cw = W - PL - PR, ch = H - PT - PB;
+  const minR = Math.min(...trend.map(t => t.rate), 50);
+  const maxR = Math.max(...trend.map(t => t.rate), 100);
+  const yScale = v => PT + ch - ((v - minR) / (maxR - minR)) * ch;
+  const xScale = (i) => PL + (i / Math.max(trend.length - 1, 1)) * cw;
+
+  // 격자
+  const yTicks = [60, 70, 80, 90, 100].filter(v => v >= minR - 5 && v <= maxR + 5);
+  let grid = yTicks.map(v => {
+    const y = yScale(v);
+    const isDash = v === 90;
+    return `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}"
+      stroke="${isDash ? '#1A237E' : '#E8EAED'}"
+      stroke-width="1" ${isDash ? 'stroke-dasharray="4,3" opacity=".5"' : ''}/>
+      <text x="${PL - 4}" y="${y + 4}" font-size="9" fill="#9AA0A6" text-anchor="end">${v}</text>
+      ${isDash ? `<text x="${W - PR + 2}" y="${y + 4}" font-size="9" fill="#1A237E">목표</text>` : ''}`;
+  }).join('');
+
+  // 꺾은선 + 점
+  const pts = trend.map((t, i) => `${xScale(i)},${yScale(t.rate)}`).join(' ');
+  const area = `${PL},${H - PB} ` + trend.map((t, i) => `${xScale(i)},${yScale(t.rate)}`).join(' ') + ` ${xScale(trend.length-1)},${H - PB}`;
+
+  let dots = trend.map((t, i) => {
+    const x = xScale(i), y = yScale(t.rate);
+    return `<circle cx="${x}" cy="${y}" r="4" fill="#1A237E"/>
+      <text x="${x}" y="${y - 7}" font-size="9" fill="#1A237E" text-anchor="middle">${t.rate}%</text>
+      <text x="${x}" y="${H - PB + 14}" font-size="9" fill="#9AA0A6" text-anchor="middle">${t.date}</text>`;
+  }).join('');
+
+  return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}">
+    ${grid}
+    <polygon points="${area}" fill="#E8EAF6" opacity=".5"/>
+    <polyline points="${pts}" fill="none" stroke="#1A237E" stroke-width="2.5" stroke-linejoin="round"/>
+    ${dots}
+  </svg>`;
+}
+
+function buildSnsList(snsList) {
+  if (!snsList || snsList.length === 0) {
+    return '<div class="note">SNS 데이터가 없습니다.</div>';
+  }
+
+  const icons = { '인스타그램': { emoji: '📸', bg: '#FCE4EC' }, '링크드인': { emoji: '💼', bg: '#E3F2FD' }, '유튜브': { emoji: '▶️', bg: '#FFEBEE' } };
+
+  const items = snsList.map(s => {
+    const ic = icons[s.channel] || { emoji: '📊', bg: '#F3E5F5' };
+    return `<div class="sns-item">
+      <div class="sns-icon" style="background:${ic.bg}">${ic.emoji}</div>
+      <div class="sns-body">
+        <div class="sns-nm">${s.channel} <span class="sns-sub">${s.metric}</span></div>
+        <div class="sns-track"><div class="sns-fill ${ragBg(s.rag)}" style="width:${Math.min(s.rate,100)}%"></div></div>
+      </div>
+      <div class="sns-pct ${rag(s.rag)}">${fmt(s.rate)}%</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="sns-list">${items}</div>`;
+}
+
+render();
+</script>
+</body>
+</html>
